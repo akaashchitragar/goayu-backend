@@ -9,5 +9,6 @@ python-multipart>=0.0.12
 email-validator>=2.2.0
 reportlab>=4.0.0
 svglib>=1.5.1
-pillow>=10.0.0pyjwt
-resend
+pillow>=10.0.0
+pyjwt>=2.8.0
+resend>=0.8.0
