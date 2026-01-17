@@ -11,3 +11,4 @@ reportlab>=4.0.0
 pillow>=10.0.0
 pyjwt>=2.8.0
 resend>=0.8.0
+certifi>=2024.0.0
