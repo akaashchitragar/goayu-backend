@@ -134,7 +134,7 @@ class EmailService:
             
             # Send email via Resend
             params = {
-                "from": "Ayushya <otp@goayu.life>",
+                "from": "Ayushya <otp@app.goayu.life>",
                 "to": [email],
                 "subject": f"Your Ayushya OTP Code: {otp}",
                 "html": html_content,
