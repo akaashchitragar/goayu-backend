@@ -73,6 +73,12 @@ async def create_consultation(request: ConsultationRequest):
         
         consultation_id = str(result.inserted_id)
         
+        # Add consultation_id field to the document for easier querying
+        db.consultations.update_one(
+            {"_id": result.inserted_id},
+            {"$set": {"consultation_id": consultation_id}}
+        )
+        
         # Link consultation to user if user_id exists in questionnaire
         if questionnaire.get("user_id"):
             user_id = questionnaire.get("user_id")

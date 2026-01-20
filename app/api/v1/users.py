@@ -63,17 +63,59 @@ async def update_user(user_id: str, update_data: UserUpdate):
 @router.get("/users/{user_id}/questionnaires")
 async def get_user_questionnaires(user_id: str):
     """Get all questionnaires for a user"""
+    from app.core.database import get_database
+    from bson import ObjectId
+    
     user_service = get_user_service()
     questionnaire_ids = await user_service.get_user_questionnaires(user_id)
-    return {"user_id": user_id, "questionnaire_ids": questionnaire_ids}
+    
+    # Fetch full questionnaire data
+    db = get_database()
+    questionnaires_collection = db["questionnaires"]
+    questionnaires = []
+    
+    for qid in questionnaire_ids:
+        try:
+            # Try to find by ObjectId first
+            questionnaire = questionnaires_collection.find_one({"_id": ObjectId(qid)})
+            if questionnaire:
+                # Convert ObjectId to string for JSON serialization
+                questionnaire["_id"] = str(questionnaire["_id"])
+                questionnaires.append(questionnaire)
+        except Exception as e:
+            print(f"Error fetching questionnaire {qid}: {e}")
+            continue
+    
+    return questionnaires
 
 
 @router.get("/users/{user_id}/consultations")
 async def get_user_consultations(user_id: str):
     """Get all consultations for a user"""
+    from app.core.database import get_database
+    from bson import ObjectId
+    
     user_service = get_user_service()
     consultation_ids = await user_service.get_user_consultations(user_id)
-    return {"user_id": user_id, "consultation_ids": consultation_ids}
+    
+    # Fetch full consultation data
+    db = get_database()
+    consultations_collection = db["consultations"]
+    consultations = []
+    
+    for cid in consultation_ids:
+        try:
+            # Try to find by ObjectId first
+            consultation = consultations_collection.find_one({"_id": ObjectId(cid)})
+            if consultation:
+                # Convert ObjectId to string for JSON serialization
+                consultation["_id"] = str(consultation["_id"])
+                consultations.append(consultation)
+        except Exception as e:
+            print(f"Error fetching consultation {cid}: {e}")
+            continue
+    
+    return consultations
 
 
 @router.get("/users/{user_id}/activities")

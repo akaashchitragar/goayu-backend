@@ -40,6 +40,12 @@ async def submit_questionnaire(submission: QuestionnaireSubmission):
         
         questionnaire_id = str(result.inserted_id)
         
+        # Add questionnaire_id field to the document for easier querying
+        db.questionnaires.update_one(
+            {"_id": result.inserted_id},
+            {"$set": {"questionnaire_id": questionnaire_id}}
+        )
+        
         # Link questionnaire to user if user_id provided
         if submission.user_id:
             user_service = get_user_service()
