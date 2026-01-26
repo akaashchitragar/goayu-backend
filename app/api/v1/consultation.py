@@ -44,12 +44,28 @@ async def create_consultation(request: ConsultationRequest):
         from app.models.questionnaire import ConstitutionalAnalysis
         constitutional_analysis = ConstitutionalAnalysis(**constitutional_analysis_dict)
         
+        # Get user info if available
+        user_id = questionnaire.get("user_id")
+        user_email = None
+        user_name = None
+        
+        if user_id:
+            user = db.users.find_one({"user_id": user_id})
+            if user:
+                user_email = user.get("email")
+                first_name = user.get("first_name", "")
+                last_name = user.get("last_name", "")
+                user_name = f"{first_name} {last_name}".strip() or None
+        
         # Generate consultation using AI
         ai_service = AIService()
         consultation_data = await ai_service.generate_consultation(
             symptoms=request.symptoms,
             constitutional_analysis=constitutional_analysis,
-            additional_notes=request.additional_notes
+            additional_notes=request.additional_notes,
+            user_id=user_id,
+            user_email=user_email,
+            user_name=user_name
         )
         
         # Prepare consultation document
