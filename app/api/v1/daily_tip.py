@@ -9,20 +9,24 @@ ai_service = AIService()
 
 
 @router.get("/daily-tip")
-async def get_daily_tip(dosha: Optional[str] = Query(None, description="User's dominant dosha for personalization")):
+async def get_daily_tip(
+    dosha: Optional[str] = Query(None, description="User's dominant dosha for personalization"),
+    force_refresh: bool = Query(False, description="Force generate a new tip, bypassing cache")
+):
     """
     Get the AI-generated daily Ayurvedic wellness tip.
     Tips are cached for the day to avoid excessive API calls.
+    Use force_refresh=true to get a new tip.
     """
     try:
         db = get_database()
         today = datetime.utcnow().date()
         today_start = datetime.combine(today, datetime.min.time())
         
-        # Check if we have a cached tip for today
+        # Check if we have a cached tip for today (skip if force_refresh is true)
         cache_key = f"daily_tip_{dosha}" if dosha else "daily_tip_general"
         
-        if db is not None:
+        if db is not None and not force_refresh:
             cached_tip = db.daily_tips_cache.find_one({
                 "cache_key": cache_key,
                 "date": {"$gte": today_start}

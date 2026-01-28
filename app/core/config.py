@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     # Google Gemini AI
     GEMINI_API_KEY: str
     
+    # Google Maps API (can use same key if enabled for Maps/Places)
+    GOOGLE_MAPS_API_KEY: str = ""
+    
     # Resend Email Service
     RESEND_API_KEY: str = ""
     

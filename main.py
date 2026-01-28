@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import connect_to_mongodb, close_mongodb_connection
-from app.api.v1 import questionnaire, consultation, pdf, users, auth, ai_usage, daily_tip
+from app.api.v1 import questionnaire, consultation, pdf, users, auth, ai_usage, daily_tip, stores
 
 
 @asynccontextmanager
@@ -97,6 +97,12 @@ app.include_router(
     daily_tip.router,
     prefix="/api/v1",
     tags=["Daily Tip"]
+)
+
+app.include_router(
+    stores.router,
+    prefix="/api/v1",
+    tags=["Stores"]
 )
 
 

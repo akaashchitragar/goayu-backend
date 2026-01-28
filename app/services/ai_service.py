@@ -83,13 +83,34 @@ class AIService:
         )
         
         import time
+        import asyncio
+        import concurrent.futures
         start_time = time.time()
         
         try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
+            print(f"Starting AI consultation generation for user {user_id}")
+            print(f"Prompt length: {len(prompt)} characters")
+            
+            # Run synchronous API call in thread pool with timeout
+            def call_gemini():
+                try:
+                    return self.client.models.generate_content(
+                        model=self.model,
+                        contents=prompt
+                    )
+                except Exception as e:
+                    print(f"Error in generate_content: {e}")
+                    raise
+            
+            # Use thread pool executor with timeout
+            loop = asyncio.get_event_loop()
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = loop.run_in_executor(executor, call_gemini)
+                try:
+                    response = await asyncio.wait_for(future, timeout=120.0)
+                except asyncio.TimeoutError:
+                    print("AI generation timed out after 120 seconds")
+                    raise Exception("AI generation timed out after 120 seconds. Please try again.")
             
             end_time = time.time()
             response_time_ms = int((end_time - start_time) * 1000)
@@ -326,8 +347,11 @@ Return ONLY valid JSON in this exact format:
 Make the tip unique, specific, and immediately actionable. Avoid generic advice."""
 
         try:
+            # Use Gemini 2.5 Flash for faster daily tip generation
+            daily_tip_model = 'gemini-2.5-flash'
+            
             response = self.client.models.generate_content(
-                model=self.model,
+                model=daily_tip_model,
                 contents=prompt
             )
             
@@ -339,7 +363,7 @@ Make the tip unique, specific, and immediately actionable. Avoid generic advice.
             completion_tokens = len(response.text) // 4 if response.text else 0
             
             self._log_ai_usage(
-                model=self.model,
+                model=daily_tip_model,
                 operation="daily_tip",
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
@@ -367,8 +391,11 @@ Make the tip unique, specific, and immediately actionable. Avoid generic advice.
             end_time = time.time()
             response_time_ms = int((end_time - start_time) * 1000)
             
+            # Use Gemini 2.5 Flash for logging consistency
+            daily_tip_model = 'gemini-2.5-flash'
+            
             self._log_ai_usage(
-                model=self.model,
+                model=daily_tip_model,
                 operation="daily_tip",
                 prompt_tokens=len(prompt) // 4,
                 completion_tokens=0,
